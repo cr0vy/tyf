@@ -1,10 +1,14 @@
 #!/usr/bin/python3
 
+import gettext
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gio, GLib, Gtk
 import signal
 
+from .widgets import EventsWidget, TypeWidget
+
+_ = gettext.gettext
 
 class MainWindow(Gtk.ApplicationWindow):
     use_csd = False
@@ -31,6 +35,12 @@ class MainWindow(Gtk.ApplicationWindow):
             self.box.pack_start(self.switcher_box, False, False, 6)
 
         self.add(self.box)
+
+        self.main_widget = MainWidget()
+        self.budget_widget = BudgetWidget()
+
+        self.add_page(self.main_widget, "main_widget", _("Main"))
+        self.add_page(self.budget_widget, "budget_widget", _("Budget"))
 
         self.show_all()
 
@@ -69,3 +79,29 @@ class Application(Gtk.Application):
         action.connect("activate", lambda *x: self.quit())
         self.add_action(action)
         self.add_accelerator("<Primary>q", "app.quit")
+
+
+"""
+-----------
+| Widgets |
+-----------
+"""
+class BudgetWidget(Gtk.Grid):
+    def __init__(self):
+        Gtk.Grid.__init__(self)
+        self.set_column_spacing(6)
+        self.set_column_homogeneous(True)
+        self.set_row_homogeneous(True)
+
+        self.events_widget = EventsWidget(name=_("Events"))
+        self.incomes_widget = TypeWidget(name=_("Incomes"))
+        self.expenses_widget = TypeWidget(name=_("Expenses"))
+
+        self.attach(Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL), 0, 0, 4, 1)
+        self.attach(self.events_widget, 0, 1, 4, 5)
+        self.attach(self.incomes_widget, 4, 1, 3, 5)
+        self.attach(self.expenses_widget, 7, 1, 3, 5)
+
+class MainWidget(Gtk.Grid):
+    def __init__(self):
+        Gtk.Grid.__init__(self)
